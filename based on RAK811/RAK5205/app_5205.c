@@ -20,7 +20,7 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define  I2C_SCL  18
 #define BAT_LEVEL_CHANNEL                       20
 /******Custom******/
-#define MOST_ADDR    0x20 // 7-bit address
+#define MOST_ADDR 0x20 // 7-bit address
 RUI_I2C_ST user_i2c; // I2C instance
 uint8_t i2c_data[3]; // I2C read and write buffer
 uint16_t data_len = 3;
@@ -149,15 +149,15 @@ void moisture_init(void)
 {
     /************ Dev ***********/
     user_i2c.INSTANCE_ID = 1;
-    user_i2c.PIN_SDA = I2C_SDA_PIN;
-    user_i2c.PIN_SCL = I2C_SCL_PIN;
+    user_i2c.PIN_SDA = I2C_SDA;
+    user_i2c.PIN_SCL = I2C_SCL;
     user_i2c.FREQUENCY = RUI_I2C_FREQ_100K;
     ret_code = rui_i2c_init(&user_i2c);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
 
     i2c_data[0] = 0x06; // Set seconds
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, 0x06, i2c_data, 0);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, 0x06, i2c_data, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C write error! %d\r\n", ret_code);
     else
@@ -277,12 +277,12 @@ void app_loop(void)
 {
     int temp=0;         
     int x,y,z;
-    int temp_moist = 0       
+    int temp_moist = 0;
     /****************************/
     RUI_RETURN_STATUS ret_code;
 
     // Note: The device address here needs to be an 8-bit address.
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, 0x05, i2c_data, data_len);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR, 0x05, i2c_data, data_len);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
