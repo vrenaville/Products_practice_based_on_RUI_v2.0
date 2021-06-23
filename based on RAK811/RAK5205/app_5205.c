@@ -148,6 +148,7 @@ void bsp_init(void)
 void moisture_init(void)
 {
     /************ Dev ***********/
+    RUI_RETURN_STATUS ret_code;
     user_i2c.INSTANCE_ID = 1;
     user_i2c.PIN_SDA = I2C_SDA;
     user_i2c.PIN_SCL = I2C_SCL;
