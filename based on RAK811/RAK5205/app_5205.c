@@ -19,6 +19,12 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define  I2C_SDA  19
 #define  I2C_SCL  18
 #define BAT_LEVEL_CHANNEL                       20
+/******Custom******/
+#define MOST_ADDR    0x20 // 7-bit address
+RUI_I2C_ST user_i2c; // I2C instance
+uint8_t i2c_data[3]; // I2C read and write buffer
+uint16_t data_len = 3;
+/******end custom******/
 
 
 RUI_GPIO_ST Led_Blue;  //join LoRaWAN successed indicator light
@@ -139,7 +145,27 @@ void bsp_init(void)
     LIS3DH_Init();
     GpsInit();	
 }
+void moisture_init(void)
+{
+    /************ Dev ***********/
+    user_i2c.INSTANCE_ID = 1;
+    user_i2c.PIN_SDA = I2C_SDA_PIN;
+    user_i2c.PIN_SCL = I2C_SCL_PIN;
+    user_i2c.FREQUENCY = RUI_I2C_FREQ_100K;
+    ret_code = rui_i2c_init(&user_i2c);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
 
+    i2c_data[0] = 0x06; // Set seconds
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, 0x06, i2c_data, 0);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C write error! %d\r\n", ret_code);
+    else
+    {
+        RUI_LOG_PRINTF("I2C write success.\r\n");
+    }
+
+}
 
 uint8_t lpp_cnt=0;  //record lpp package count
 typedef struct 
@@ -250,7 +276,22 @@ extern bsp_sensor_data_t bsp_sensor;
 void app_loop(void)
 {
     int temp=0;         
-    int x,y,z;       
+    int x,y,z;
+    int temp_moist = 0       
+    /****************************/
+    RUI_RETURN_STATUS ret_code;
+
+    // Note: The device address here needs to be an 8-bit address.
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, 0x05, i2c_data, data_len);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
+    else
+        RUI_LOG_PRINTF("Time is %02X:%02X:.\r\n", i2c_data[1], i2c_data[0]);
+
++    /**************/
+
+
+
     rui_lora_get_status(false,&app_lora_status);
     if(app_lora_status.IsJoined)  //if LoRaWAN is joined
     {
@@ -602,6 +643,7 @@ void main(void)
     rui_uart_mode_config(RUI_UART3,RUI_UART_USER); //Forces UART3 to be configured in RUI_UART_USER mode
     rui_init();
     bsp_init();
+    moisture_init();
     
     /*******************************************************************************************
      * Register LoRaMac callback function
