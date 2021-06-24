@@ -27,8 +27,8 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define MOST_SLEEP 0x08 // 7-bit address
 
 RUI_I2C_ST user_i2c; // I2C instance
-uint8_t i2c_data[2]; // I2C read and write buffer
-uint16_t data_len = 2;
+int i2c_data[2]; // I2C read and write buffer
+int data_len = 2;
 /******end custom******/
 
 
@@ -162,6 +162,8 @@ void moisture_init(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
     rui_delay_ms(1500);
+    i2c_data[0] = 0;
+    i2c_data[1] = 0;
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, MOST_RESET, i2c_data, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C write error! %d\r\n", ret_code);
@@ -288,6 +290,8 @@ void app_loop(void)
     RUI_RETURN_STATUS ret_code;
 
     // Note: The device address here needs to be an 8-bit address.
+    i2c_data[0] = 0;
+    i2c_data[1] = 0;
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR, MOST_TEMPERATURE, i2c_data, 2);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
