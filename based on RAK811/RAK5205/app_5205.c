@@ -634,6 +634,7 @@ void bsp_sleep(void)
              * user process code before enter sleep
     ******************************************************************************/
 	GpsStop();  //close gps before entry sleep mode
+    moisture_sleep();
 	rui_timer_stop(&Gps_Cnt_Timer);  //stop search satellite timer
 } 
 extern bool gps_timeout_flag;
