@@ -618,6 +618,7 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
     /*****************************************************************************
              * user process code before enter sleep
     ******************************************************************************/
+    RUI_RETURN_STATUS ret_code;
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, MOST_SLEEP, i2c_data, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
@@ -648,7 +649,7 @@ void bsp_wakeup(void)
     gps_timeout_flag = true;  //clear serch Satellite flag 	
     GpsInit();
     bsp_i2c_init();
-    moisture_init()
+    moisture_init();
     BME680_Init();
     LIS3DH_Init();
     rui_delay_ms(50);
