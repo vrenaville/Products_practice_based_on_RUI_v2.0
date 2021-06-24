@@ -21,9 +21,14 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define BAT_LEVEL_CHANNEL                       20
 /******Custom******/
 #define MOST_ADDR 0x20 // 7-bit address
+#define MOST_RESET 0x06 // 7-bit address
+#define MOST_TEMPERATURE 0x05 // 7-bit address
+#define MOST_MOSTURE 0x00 // 7-bit address
+#define MOST_SLEEP 0x08 // 7-bit address
+
 RUI_I2C_ST user_i2c; // I2C instance
-uint8_t i2c_data[3]; // I2C read and write buffer
-uint16_t data_len = 3;
+uint8_t i2c_data[2]; // I2C read and write buffer
+uint16_t data_len = 2;
 /******end custom******/
 
 
@@ -157,8 +162,7 @@ void moisture_init(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
 
-    i2c_data[0] = 0x06; // Set seconds
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, 0x06, i2c_data, 0);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, MOST_RESET, i2c_data, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C write error! %d\r\n", ret_code);
     else
@@ -283,16 +287,13 @@ void app_loop(void)
     RUI_RETURN_STATUS ret_code;
 
     // Note: The device address here needs to be an 8-bit address.
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR, 0x05, i2c_data, data_len);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR, MOST_TEMPERATURE, i2c_data, 2);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Time is %02X:%02X:.\r\n", i2c_data[1], i2c_data[0]);
+        RUI_LOG_PRINTF("Time is %02X:%02X:\r\n", i2c_data[1], i2c_data[0]);
 
-+    /**************/
-
-
-
+    /**************/
     rui_lora_get_status(false,&app_lora_status);
     if(app_lora_status.IsJoined)  //if LoRaWAN is joined
     {
@@ -612,6 +613,21 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
  * sleep and wakeup callback
  * 
  * *****************************************************************************************/
+ void moisture_sleep(void)
+{
+    /*****************************************************************************
+             * user process code before enter sleep
+    ******************************************************************************/
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, MOST_SLEEP, i2c_data, 0);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
+    else
+    {
+        RUI_LOG_PRINTF("I2C write sleep success.\r\n");
+    }
+
+} 
+
 void bsp_sleep(void)
 {
     /*****************************************************************************
@@ -631,6 +647,7 @@ void bsp_wakeup(void)
     gps_timeout_flag = true;  //clear serch Satellite flag 	
     GpsInit();
     bsp_i2c_init();
+    moisture_init()
     BME680_Init();
     LIS3DH_Init();
     rui_delay_ms(50);
