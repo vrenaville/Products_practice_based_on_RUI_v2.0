@@ -24,10 +24,10 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define MOST_ADDR_WRITE       (MOST_ADDR<<1)
 #define MOST_ADDR_READ        (MOST_ADDR<<1 | 0x01)
 
-#define MOST_RESET 0x06 // 7-bit address
-#define MOST_TEMPERATURE 0x05 // 7-bit address
-#define MOST_MOSTURE 0x00 // 7-bit address
-#define MOST_SLEEP 0x08 // 7-bit address
+#define MOST_RESET 0x06 
+#define MOST_TEMPERATURE 0x05 
+#define MOST_MOSTURE 0x00 
+#define MOST_SLEEP 0x08 
 
 RUI_I2C_ST user_i2c; // I2C instance
 uint8_t i2c_data[2]; // I2C read and write buffer
@@ -276,7 +276,7 @@ void user_lora_send(void)
 uint8_t get_external_temp(void)
 {
     RUI_RETURN_STATUS ret_code;
-
+    uint16_t value = 0
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
@@ -286,13 +286,14 @@ uint8_t get_external_temp(void)
     else
         RUI_LOG_PRINTF("Temperature is %d:\r\n", i2c_data[1]);
     rui_delay_ms(1500);
-    return i2c_data[1];
+    value = (i2c_data[0] << 8) | i2c_data[1];
+    return value;
 }
 
 uint8_t get_external_mosture(void)
 {
     RUI_RETURN_STATUS ret_code;
-
+    uint16_t value = 0
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
@@ -302,7 +303,8 @@ uint8_t get_external_mosture(void)
     else
         RUI_LOG_PRINTF("Mosture is %d\r\n",i2c_data[1]);
     rui_delay_ms(1500);
-    return i2c_data[1];
+    value = (i2c_data[0] << 8) | i2c_data[1];
+    return value;
 }
 
 
@@ -650,7 +652,8 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
              * user process code before enter sleep
     ******************************************************************************/
     RUI_RETURN_STATUS ret_code;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, 0, 0);
+    uint8_t flag = 0x00
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_READ, MOST_SLEEP, &flag, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
     else
