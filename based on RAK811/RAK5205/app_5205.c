@@ -166,16 +166,6 @@ void moisture_init(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
     rui_delay_ms(1500);
-    i2c_data[0] = 0;
-    i2c_data[1] = 0;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_RESET, i2c_data, 0);
-    if (ret_code != RUI_STATUS_OK)
-        RUI_LOG_PRINTF("I2C write error! %d\r\n", ret_code);
-    else
-    {
-        RUI_LOG_PRINTF("I2C write success.\r\n");
-    }
-    rui_delay_ms(1500);
 }
 
 uint8_t lpp_cnt=0;  //record lpp package count
@@ -283,13 +273,8 @@ void user_lora_send(void)
     }                    
 }
 
-extern bsp_sensor_data_t bsp_sensor;
-void app_loop(void)
+uint8_t get_external_temp(void)
 {
-    int temp=0;         
-    int x,y,z;
-    int temp_moist = 0;
-    /****************************/
     RUI_RETURN_STATUS ret_code;
 
     // Note: The device address here needs to be an 8-bit address.
@@ -299,9 +284,35 @@ void app_loop(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Time is %02X:%02X:\r\n", i2c_data[1], i2c_data[0]);
+        RUI_LOG_PRINTF("Temperature is %d:\r\n", i2c_data[0]);
     rui_delay_ms(1500);
-    /**************/
+    return i2c_data[0]
+}
+
+uint8_t get_external_mosture(void)
+{
+    RUI_RETURN_STATUS ret_code;
+
+    // Note: The device address here needs to be an 8-bit address.
+    i2c_data[0] = 0;
+    i2c_data[1] = 0;
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, MOST_MOSTURE, i2c_data, 2);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
+    else
+        RUI_LOG_PRINTF("Mosture is %d:%d\r\n", i2c_data[0],i2c_data[1]);
+    rui_delay_ms(1500);
+    return i2c_data[0]
+}
+
+
+extern bsp_sensor_data_t bsp_sensor;
+void app_loop(void)
+{
+    int temp=0;         
+    int x,y,z;
+    uint8_t external_temp = 0;
+    uint8_t external_mosture = 0;
     rui_lora_get_status(false,&app_lora_status);
     if(app_lora_status.IsJoined)  //if LoRaWAN is joined
     {
@@ -363,7 +374,19 @@ void app_loop(void)
             a[sensor_data_cnt++]=temp&0xff;	
             lpp_data[lpp_cnt].size = sensor_data_cnt - lpp_data[lpp_cnt].startcnt;	
             lpp_cnt++;		
-
+            // Mosture and External Temp
+            external_temp=(uint16_t)(get_external_temp()/10);
+            external_mosture=(uint16_t)(get_external_mosture());
+            lpp_data[lpp_cnt].startcnt = sensor_data_cnt;
+            a[sensor_data_cnt++]=0x03;
+            a[sensor_data_cnt++]=0x71;
+            a[sensor_data_cnt++]=(external_temp>>8) & 0xff;
+            a[sensor_data_cnt++]=external_temp & 0xff;
+            a[sensor_data_cnt++]=(external_mosture>>8) & 0xff;
+            a[sensor_data_cnt++]=external_mosture & 0xff;
+            lpp_data[lpp_cnt].size = sensor_data_cnt - lpp_data[lpp_cnt].startcnt;
+            lpp_cnt++;
+            //
             if(BME680_get_data(&bsp_sensor.humidity,&bsp_sensor.temperature,&bsp_sensor.pressure,&bsp_sensor.resis)==0)
             {
                 lpp_data[lpp_cnt].startcnt = sensor_data_cnt;
@@ -398,7 +421,7 @@ void app_loop(void)
                 lpp_cnt++;
             }
 
-            if(lis3dh_get_data(&bsp_sensor.triaxial_x,&bsp_sensor.triaxial_y,&bsp_sensor.triaxial_z) == 0)
+/*             if(lis3dh_get_data(&bsp_sensor.triaxial_x,&bsp_sensor.triaxial_y,&bsp_sensor.triaxial_z) == 0)
             {
                 x=(int)(bsp_sensor.triaxial_x);y=(int)(bsp_sensor.triaxial_y);z=(int)(bsp_sensor.triaxial_z);
                 lpp_data[lpp_cnt].startcnt = sensor_data_cnt;
@@ -413,7 +436,7 @@ void app_loop(void)
                 lpp_data[lpp_cnt].size = sensor_data_cnt - lpp_data[lpp_cnt].startcnt;
                 lpp_cnt++;
             }
-
+ */
 	        if(sensor_data_cnt != 0)
             { 
                 sample_status = true;                   
