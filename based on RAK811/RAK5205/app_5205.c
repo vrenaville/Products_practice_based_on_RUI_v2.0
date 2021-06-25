@@ -284,7 +284,7 @@ uint8_t get_external_temp(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Temperature is %d:\r\n", i2c_data[0]);
+        RUI_LOG_PRINTF("Temperature is %d:\r\n", i2c_data[1]);
     rui_delay_ms(1500);
     return i2c_data[1];
 }
@@ -300,7 +300,7 @@ uint8_t get_external_mosture(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Mosture is %d:%d\r\n",i2c_data[1]);
+        RUI_LOG_PRINTF("Mosture is %d\r\n",i2c_data[1]);
     rui_delay_ms(1500);
     return i2c_data[1];
 }
@@ -375,7 +375,7 @@ void app_loop(void)
             lpp_data[lpp_cnt].size = sensor_data_cnt - lpp_data[lpp_cnt].startcnt;	
             lpp_cnt++;		
             // Mosture and External Temp
-            external_temp=(uint16_t)(get_external_temp()/10);
+            external_temp=(uint16_t)(get_external_temp());
             external_mosture=(uint16_t)(get_external_mosture());
             lpp_data[lpp_cnt].startcnt = sensor_data_cnt;
             a[sensor_data_cnt++]=0x03;
