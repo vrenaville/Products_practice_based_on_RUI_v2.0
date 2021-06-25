@@ -286,7 +286,7 @@ uint8_t get_external_temp(void)
     else
         RUI_LOG_PRINTF("Temperature is %d:\r\n", i2c_data[0]);
     rui_delay_ms(1500);
-    return i2c_data[0]
+    return i2c_data[1];
 }
 
 uint8_t get_external_mosture(void)
@@ -300,9 +300,9 @@ uint8_t get_external_mosture(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Mosture is %d:%d\r\n", i2c_data[0],i2c_data[1]);
+        RUI_LOG_PRINTF("Mosture is %d:%d\r\n",i2c_data[1]);
     rui_delay_ms(1500);
-    return i2c_data[0]
+    return i2c_data[1];
 }
 
 
@@ -650,7 +650,7 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
              * user process code before enter sleep
     ******************************************************************************/
     RUI_RETURN_STATUS ret_code;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, MOST_SLEEP, i2c_data, 0);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, 0, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
     else
