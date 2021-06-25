@@ -21,14 +21,18 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define BAT_LEVEL_CHANNEL                       20
 /******Custom******/
 #define MOST_ADDR 0x20 // 7-bit address
+#define MOST_ADDR_WRITE       (MOST_ADDR<<1)
+#define MOST_ADDR_READ        (MOST_ADDR<<1 | 0x01)
+
 #define MOST_RESET 0x06 // 7-bit address
 #define MOST_TEMPERATURE 0x05 // 7-bit address
 #define MOST_MOSTURE 0x00 // 7-bit address
 #define MOST_SLEEP 0x08 // 7-bit address
 
 RUI_I2C_ST user_i2c; // I2C instance
-int i2c_data[2]; // I2C read and write buffer
-int data_len = 2;
+uint8_t i2c_data[2]; // I2C read and write buffer
+uint16_t data_len = 2;
+
 /******end custom******/
 
 
@@ -164,7 +168,7 @@ void moisture_init(void)
     rui_delay_ms(1500);
     i2c_data[0] = 0;
     i2c_data[1] = 0;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR, MOST_RESET, i2c_data, 0);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_RESET, i2c_data, 0);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C write error! %d\r\n", ret_code);
     else
@@ -172,7 +176,6 @@ void moisture_init(void)
         RUI_LOG_PRINTF("I2C write success.\r\n");
     }
     rui_delay_ms(1500);
-
 }
 
 uint8_t lpp_cnt=0;  //record lpp package count
@@ -292,7 +295,7 @@ void app_loop(void)
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR, MOST_TEMPERATURE, i2c_data, 2);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, MOST_TEMPERATURE, i2c_data, 2);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
