@@ -165,6 +165,14 @@ void moisture_init(void)
     ret_code = rui_i2c_init(&user_i2c);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_READ, MOST_RESET, 0, 0);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
+    else
+    {
+        RUI_LOG_PRINTF("I2C write sleep success.\r\n");
+    }
+
     rui_delay_ms(1500);
 }
 
@@ -277,6 +285,7 @@ uint8_t get_external_temp(void)
 {
     RUI_RETURN_STATUS ret_code;
     uint16_t value = 0
+    int t = 0 ;
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
@@ -284,16 +293,18 @@ uint8_t get_external_temp(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Temperature is %d:\r\n", i2c_data[1]);
+        RUI_LOG_PRINTF("Temperature is %d:%d\r\n", i2c_data[0],i2c_data[1]);
     rui_delay_ms(1500);
-    value = (i2c_data[0] << 8) | i2c_data[1];
-    return value;
+    t = i2c_data[1] << 8;
+    t = t | i2c_data[0];
+    RUI_LOG_PRINTF("Temperature Transform is %d\r\n",t);
+    return t;
 }
 
 uint8_t get_external_mosture(void)
 {
     RUI_RETURN_STATUS ret_code;
-    uint16_t value = 0
+    int t = 0 ;
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
@@ -301,10 +312,12 @@ uint8_t get_external_mosture(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Mosture is %d\r\n",i2c_data[1]);
+        RUI_LOG_PRINTF("Mosture is %d:%d\r\n", i2c_data[0],i2c_data[1]);
     rui_delay_ms(1500);
-    value = (i2c_data[0] << 8) | i2c_data[1];
-    return value;
+    t = i2c_data[1] << 8;
+    t = t | i2c_data[0];
+    RUI_LOG_PRINTF("Mosture Transform is %d\r\n",t);
+    return t;
 }
 
 
@@ -652,8 +665,12 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
              * user process code before enter sleep
     ******************************************************************************/
     RUI_RETURN_STATUS ret_code;
+<<<<<<< HEAD
     uint8_t flag = 0x00
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_READ, MOST_SLEEP, &flag, 0);
+=======
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_READ, MOST_SLEEP, 0, 0);
+>>>>>>> [FIX] Rak5205
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
     else
