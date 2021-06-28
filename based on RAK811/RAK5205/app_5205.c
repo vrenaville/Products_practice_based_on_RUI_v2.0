@@ -284,8 +284,7 @@ void user_lora_send(void)
 uint8_t get_external_temp(void)
 {
     RUI_RETURN_STATUS ret_code;
-    uint16_t value = 0
-    int t = 0 ;
+    uint16_t t = 0 ;
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
@@ -304,7 +303,7 @@ uint8_t get_external_temp(void)
 uint8_t get_external_mosture(void)
 {
     RUI_RETURN_STATUS ret_code;
-    int t = 0 ;
+    uint16_t t = 0 ;
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
