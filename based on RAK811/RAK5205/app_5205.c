@@ -292,10 +292,10 @@ uint8_t get_external_temp(void)
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
-        RUI_LOG_PRINTF("Temperature is %d:%d\r\n", i2c_data[0],i2c_data[1]);
+        RUI_LOG_PRINTF("Temperature is %d:%d\r\n", i2c_data[1],i2c_data[0]);
     rui_delay_ms(1500);
-    t = i2c_data[1] << 8;
-    t = t | i2c_data[0];
+    t = i2c_data[0] << 8;
+    t = t | i2c_data[1];
     RUI_LOG_PRINTF("Temperature Transform is %d\r\n",t);
     return t;
 }
@@ -307,14 +307,15 @@ uint8_t get_external_mosture(void)
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
     i2c_data[1] = 0;
+
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, MOST_MOSTURE, i2c_data, 2);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C read error! %d\r\n", ret_code);
     else
         RUI_LOG_PRINTF("Mosture is %d:%d\r\n", i2c_data[0],i2c_data[1]);
     rui_delay_ms(1500);
-    t = i2c_data[1] << 8;
-    t = t | i2c_data[0];
+    t = i2c_data[0] << 8;
+    t = t | i2c_data[1];
     RUI_LOG_PRINTF("Mosture Transform is %d\r\n",t);
     return t;
 }
@@ -325,8 +326,8 @@ void app_loop(void)
 {
     int temp=0;         
     int x,y,z;
-    uint8_t external_temp = 0;
-    uint8_t external_mosture = 0;
+    uint16_t external_temp = 0;
+    uint16_t external_mosture = 0;
     rui_lora_get_status(false,&app_lora_status);
     if(app_lora_status.IsJoined)  //if LoRaWAN is joined
     {
