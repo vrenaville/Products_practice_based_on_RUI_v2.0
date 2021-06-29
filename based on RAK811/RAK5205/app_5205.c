@@ -669,8 +669,8 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
              * user process code before enter sleep
     ******************************************************************************/
     RUI_RETURN_STATUS ret_code;
-    uint8_t switch = 0x08;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, &switch, 1);
+    uint8_t switch_sleep = 0x08;
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, &switch_sleep, 1);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
     else
