@@ -273,7 +273,7 @@ void user_lora_send(void)
     }                    
 }
 
-uint8_t get_external_temp(void)
+uint16_t get_external_temp(void)
 {
     RUI_RETURN_STATUS ret_code;
     // Wake up
@@ -303,7 +303,7 @@ uint8_t get_external_temp(void)
     return t;
 }
 
-uint8_t get_external_mosture(void)
+uint16_t get_external_mosture(void)
 {
     RUI_RETURN_STATUS ret_code;
     uint16_t t = 0 ;
