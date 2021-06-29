@@ -27,7 +27,8 @@ RUI_LORA_STATUS_T app_lora_status; //record status
 #define MOST_RESET 0x06 
 #define MOST_TEMPERATURE 0x05 
 #define MOST_MOSTURE 0x00 
-#define MOST_SLEEP 0x08 
+#define MOST_SLEEP 0x08
+#define MOST_GETVERSION 0x07 
 
 RUI_I2C_ST user_i2c; // I2C instance
 uint8_t i2c_data[2]; // I2C read and write buffer
@@ -165,15 +166,6 @@ void moisture_init(void)
     ret_code = rui_i2c_init(&user_i2c);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C init error! %d\r\n", ret_code);
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_RESET, 0, 0);
-    if (ret_code != RUI_STATUS_OK)
-        RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
-    else
-    {
-        RUI_LOG_PRINTF("I2C write sleep success.\r\n");
-    }
-
-    rui_delay_ms(1500);
 }
 
 uint8_t lpp_cnt=0;  //record lpp package count
@@ -284,6 +276,18 @@ void user_lora_send(void)
 uint8_t get_external_temp(void)
 {
     RUI_RETURN_STATUS ret_code;
+    // Wake up
+    uint8_t version = 0x00
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, MOST_GETVERSION, &version, 1);
+    if (ret_code != RUI_STATUS_OK)
+        RUI_LOG_PRINTF("I2C wakeup error! %d\r\n", ret_code);
+    else
+    {
+        RUI_LOG_PRINTF("I2C read version success.\r\n");
+    }
+
+    rui_delay_ms(1500);
+
     uint16_t t = 0 ;
     // Note: The device address here needs to be an 8-bit address.
     i2c_data[0] = 0;
@@ -665,7 +669,8 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
              * user process code before enter sleep
     ******************************************************************************/
     RUI_RETURN_STATUS ret_code;
-    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, 0x00, 0x00);
+    uint8_t switch = 0x08
+    ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, &switch, 1);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C Sleep error! %d\r\n", ret_code);
     else
