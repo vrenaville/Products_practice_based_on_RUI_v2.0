@@ -277,7 +277,7 @@ uint8_t get_external_temp(void)
 {
     RUI_RETURN_STATUS ret_code;
     // Wake up
-    uint8_t version = 0x00;
+/*     uint8_t version = 0x00;
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_READ, MOST_ADDR_READ, MOST_GETVERSION, &version, 1);
     if (ret_code != RUI_STATUS_OK)
         RUI_LOG_PRINTF("I2C wakeup error! %d\r\n", ret_code);
@@ -285,8 +285,7 @@ uint8_t get_external_temp(void)
     {
         RUI_LOG_PRINTF("I2C read version success.\r\n");
     }
-
-    rui_delay_ms(1500);
+ */
 
     uint16_t t = 0 ;
     // Note: The device address here needs to be an 8-bit address.
@@ -669,6 +668,7 @@ void rui_uart_recv(RUI_UART_DEF uart_def, uint8_t *pdata, uint16_t len)
              * user process code before enter sleep
     ******************************************************************************/
     RUI_RETURN_STATUS ret_code;
+    /* this is a hack but doen't work, totally crush the i2c bus */
     uint8_t switch_sleep = 0x08;
     ret_code = rui_i2c_rw(&user_i2c, RUI_IF_WRITE, MOST_ADDR_WRITE, MOST_SLEEP, &switch_sleep, 1);
     if (ret_code != RUI_STATUS_OK)
@@ -686,7 +686,7 @@ void bsp_sleep(void)
              * user process code before enter sleep
     ******************************************************************************/
 	GpsStop();  //close gps before entry sleep mode
-    moisture_sleep();
+    //moisture_sleep();
 	rui_timer_stop(&Gps_Cnt_Timer);  //stop search satellite timer
 } 
 extern bool gps_timeout_flag;
