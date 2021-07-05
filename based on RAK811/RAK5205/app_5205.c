@@ -152,8 +152,8 @@ void bsp_init(void)
     bsp_adc_init();
     bsp_i2c_init();
     BME680_Init();
-    LIS3DH_Init();
-    GpsInit();	
+    //LIS3DH_Init();
+    //GpsInit();	
 }
 void moisture_init(void)
 {
@@ -338,7 +338,7 @@ void app_loop(void)
         {
             autosend_flag=false;
             rui_delay_ms(5);               
-            if(GPS_get_data(&bsp_sensor.latitude,&bsp_sensor.longitude,&bsp_sensor.altitude) == 0)
+/*             if(GPS_get_data(&bsp_sensor.latitude,&bsp_sensor.longitude,&bsp_sensor.altitude) == 0)
             {
                 switch(user_store_data.gps_format)
                 {
@@ -380,7 +380,7 @@ void app_loop(void)
                     default :break;
                 }                
             }
-
+ */
             BoardBatteryMeasureVolage(&bsp_sensor.voltage);
             bsp_sensor.voltage=bsp_sensor.voltage/1000.0;   //convert mV to V
             RUI_LOG_PRINTF("Battery Voltage = %d.%d V \r\n",(uint32_t)(bsp_sensor.voltage), (uint32_t)((bsp_sensor.voltage)*1000-((int32_t)(bsp_sensor.voltage)) * 1000));
@@ -698,11 +698,11 @@ void bsp_wakeup(void)
     sendfull = true;  //clear subcontract send flag
     sample_status = false;  //clear sample flag
     gps_timeout_flag = true;  //clear serch Satellite flag 	
-    GpsInit();
+    //GpsInit();
     bsp_i2c_init();
     moisture_init();
     BME680_Init();
-    LIS3DH_Init();
+    //LIS3DH_Init();
     rui_delay_ms(50);
 }
 
